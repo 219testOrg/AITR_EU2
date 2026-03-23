@@ -201,6 +201,13 @@ exports.destroy = function (req, res, next) {
 };
 
 exports.edit = function (req, res, next) {
+  // Validate and sanitize the id parameter to prevent command injection
+  // MongoDB ObjectIDs should be 24-character hex strings
+  const id = req.params.id;
+  if (!id || !/^[a-fA-F0-9]{24}$/.test(id)) {
+    return res.status(400).send('Invalid ID format');
+  }
+
   Todo.
     find({}).
     sort('-updated_at').
@@ -210,7 +217,7 @@ exports.edit = function (req, res, next) {
       res.render('edit', {
         title: 'TODO',
         todos: todos,
-        current: req.params.id
+        current: id
       });
     });
 };
