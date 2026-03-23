@@ -10,6 +10,7 @@ var readline = require('readline');
 var moment = require('moment');
 var exec = require('child_process').exec;
 var validator = require('validator');
+var xss = require('xss');
 
 // zip-slip
 var fileType = require('file-type');
@@ -207,9 +208,18 @@ exports.edit = function (req, res, next) {
     exec(function (err, todos) {
       if (err) return next(err);
 
+      // Sanitize todo content to prevent Stored XSS attacks
+      var sanitizedTodos = todos.map(function(todo) {
+        return {
+          _id: todo._id,
+          content: xss(todo.content),
+          updated_at: todo.updated_at
+        };
+      });
+
       res.render('edit', {
         title: 'TODO',
-        todos: todos,
+        todos: sanitizedTodos,
         current: req.params.id
       });
     });
