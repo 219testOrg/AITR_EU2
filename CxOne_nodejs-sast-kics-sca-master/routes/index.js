@@ -210,9 +210,19 @@ exports.edit = function (req, res, next) {
     exec(function (err, todos) {
       if (err) return next(err);
 
+      // Sanitize todos to prevent Stored XSS attacks
+      // Escape HTML special characters in todo content before rendering
+      const sanitizedTodos = todos.map(function(todo) {
+        return {
+          _id: todo._id,
+          content: validator.escape(todo.content),
+          updated_at: todo.updated_at
+        };
+      });
+
       res.render('edit', {
         title: 'TODO',
-        todos: todos,
+        todos: sanitizedTodos,
         current: req.params.id
       });
     });
