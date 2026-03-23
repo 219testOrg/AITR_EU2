@@ -66,10 +66,15 @@ function adminLoginSuccess(redirectPage, session, username, res) {
 }
 
 exports.login = function (req, res, next) {
+  // Sanitize redirectPage to prevent XSS attacks
+  const sanitizedRedirectPage = req.query.redirectPage
+    ? validator.escape(req.query.redirectPage)
+    : '';
+
   return res.render('admin', {
     title: 'Admin Access',
     granted: false,
-    redirectPage: req.query.redirectPage
+    redirectPage: sanitizedRedirectPage
   });
 };
 
