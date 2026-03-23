@@ -104,8 +104,18 @@ exports.save_account_details = function(req, res, next) {
     profile.firstname = validator.rtrim(profile.firstname)
     profile.lastname = validator.rtrim(profile.lastname)
 
-    // render the view
-    return res.render('account.hbs', profile)
+    // Sanitize all profile fields to prevent XSS attacks
+    // validator.escape() converts HTML special characters to entities
+    const sanitizedProfile = {
+      firstname: validator.escape(profile.firstname),
+      lastname: validator.escape(profile.lastname),
+      country: validator.escape(profile.country),
+      phone: validator.escape(profile.phone),
+      email: validator.escape(profile.email)
+    }
+
+    // render the view with sanitized data
+    return res.render('account.hbs', sanitizedProfile)
   } else {
     // if input validation fails, we just render the view as is
     console.log('error in form details')
